@@ -1,0 +1,154 @@
+{% extends 'layouts/blank.html' %}
+
+{% block content %}
+
+<div class="h-screen flex flex-col ">
+    <!-- Fixed Navbar -->
+    <nav class="bg-gray-900 text-white fixed w-full z-10 top-0 shadow flex items-center justify-between">
+        <h1 class="text-lg font-bold px-4 tx-gray-800">Responsive Webpage</h1>
+    </nav>
+
+    <!-- Toggle Buttons -->
+    <div class="flex justify-between bg-gray-800 text-white p-2  relative mt-0 top-1">
+        <!-- Left Menu Toggle -->
+        <button id="toggle-left-menu" class="bg-emerald-500 text-white px-4 py-2 rounded transition-all duration-300">
+            ☰ 
+        </button>
+        <!-- Right Panel Toggle -->
+        <button id="toggle-right-panel" class="bg-emerald-500 text-white px-4 py-2 rounded transition-all duration-300">
+            <!-- Notification Icon -->
+<div class="relative">
+    <!-- Bell Icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.992 2.992 0 0018 12V8a6 6 0 10-12 0v4a2.992 2.992 0 00-1.595 3.595L4 17h5m6 0a3 3 0 01-6 0m6 0H9" />
+    </svg>
+    
+    <!-- Notification Badge -->
+    <span class="absolute top-0 right-4 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">3</span>
+</div>
+
+        </button>
+    </div>
+
+    <!-- Page Content -->
+    <div class="flex h-full top-1">
+        <!-- Collapsible Left Menu -->
+        <div id="left-menu" class="bg-gray-800 text-white w-64 p-4 transition-all duration-300">
+            <h2 class="font-semibold">Friends</h2>
+            <ul>
+                <li><a href="#" class="hover:underline">Friend1</a></li>
+                
+            </ul>
+        </div>
+
+        <!-- Main Content Area (Chat Window) -->
+        <main class="flex-grow flex flex-col p-4 bg-gray-100">
+            <!-- Chat Window -->
+            <div id="chat_window" class="flex flex-col bg-gray-800 rounded-2xl shadow-2xl relative h-full">
+                <!-- Chat Header -->
+                <div class="flex justify-center text-emerald-400 bg-gray-800 p-2 sticky top-0 z-10">
+                    <div id="online-icon"></div>
+                    <span id="online-count" class="pr-1"></span>online
+                </div>
+                <!-- Chat Messages -->
+                <div id='chat_container' class="overflow-y-auto flex-grow p-4">
+                    <ul id='chat_messages' class="flex flex-col justify-end gap-2">
+                        {% for message in chat_messages reversed %}
+                            {% include 'a_rtchat/chat_message.html' %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- Message Input (Always sticky at the bottom) -->
+                <div class="bg-gray-800 p-2 z-10 flex-shrink-0">
+                    <div class="flex items-center rounded-xl px-2 py-2">
+                        <form method="POST" id="chat_message_form" class="w-full"
+                            hx-ext="ws"
+                            ws-connect="/ws/chatroom/Social_chat"
+                            ws-send
+                            _="on htmx:wsAfterSend reset() me">
+                            {% csrf_token %}
+                            {{form }}
+                        </form>
+                    </div>
+                </div>
+                
+            </div>
+        </main>
+
+        <!-- Collapsible Right-Side Panel -->
+        <aside id="right-panel" class="bg-gray-200 w-64 p-4 transition-all duration-300">
+            <h2 class="font-semibold">Notifications</h2>
+            <p>Comming Soon</p>
+        </aside>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white p-4 text-center">
+        <p>© Nikhil_Gupta</p>
+    </footer>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+    // Toggle Left Menu
+    document.getElementById('toggle-left-menu').addEventListener('click', function () {
+        const leftMenu = document.getElementById('left-menu');
+        const toggleButton = document.getElementById('toggle-left-menu');
+        
+        // Toggle the visibility of the left menu
+        leftMenu.classList.toggle('hidden');
+
+        // Change the toggle button to cross and vice versa
+        if (leftMenu.classList.contains('hidden')) {
+            toggleButton.innerHTML = '☰ ';
+        } else {
+            toggleButton.innerHTML = '✖ '; // Cross button
+        }
+    });
+
+    // Toggle Right Panel
+    document.getElementById('toggle-right-panel').addEventListener('click', function () {
+        const rightPanel = document.getElementById('right-panel');
+        const rightButton = document.getElementById('toggle-right-panel');
+
+        // Toggle the visibility of the right panel
+        rightPanel.classList.toggle('hidden');
+        
+       
+    });
+
+    function scrollToBottom(time=0) {
+        setTimeout(function() {
+            const container = document.getElementById('chat_container');
+            container.scrollTop = container.scrollHeight;
+        }, time);
+    }
+    scrollToBottom();
+
+    // Responsive Shrinking Logic
+    function adjustPageWidth() {
+        const width = window.innerWidth;
+        const body = document.body;
+
+        if (width <= 600) {
+            body.style.transform = 'scale(0.5)';
+        } else if (width <= 700) {
+            body.style.transform = 'scale(0.75)';
+        } else if (width <= 767) {
+            body.style.transform = 'scale(0.8)';
+        } else if (width <= 1600) {
+            body.style.transform = 'scale(0.9)';
+        } else {
+            body.style.transform = 'scale(1)';
+        }
+
+        body.style.transformOrigin = 'top left';
+    }
+
+    // Adjust page width on load and resize
+    adjustPageWidth();
+    window.addEventListener('resize', adjustPageWidth);
+</script>
+{% endblock %}
